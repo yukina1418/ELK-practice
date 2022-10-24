@@ -1,0 +1,59 @@
+- pipeline.id: busan
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/busan.conf"
+
+- pipeline.id: chungcheong_buk_do
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/chungcheong_buk_do.conf"
+
+- pipeline.id: chungcheong_nam_do
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/chungcheong_nam_do.conf"
+
+- pipeline.id: daegu
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/daegu.conf"
+
+- pipeline.id: gwangju
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/gwangju.conf"
+
+- pipeline.id: gyeonggi_do
+  pipeline.workers: 2
+  path.config: "/usr/share/logstash/pipeline/gyeonggi_do.conf"
+
+- pipeline.id: gyeongsang_buk_do
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/gyeongsang_buk_do.conf"
+
+- pipeline.id: gyeongsang_nam_do
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/gyeongsang_nam_do.conf"
+
+- pipeline.id: incheon
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/incheon.conf"
+
+- pipeline.id: jeju_do
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/jeju_do.conf"
+
+- pipeline.id: jeolla_buk_do
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/jeolla_buk_do.conf"
+
+- pipeline.id: jeolla_nam_do
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/jeolla_nam_do.conf"
+
+- pipeline.id: sejong
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/sejong.conf"
+
+- pipeline.id: seoul
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/seoul.conf"
+
+- pipeline.id: ulsan
+  pipeline.workers: 1
+  path.config: "/usr/share/logstash/pipeline/ulsan.conf"

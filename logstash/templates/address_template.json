@@ -1,0 +1,35 @@
+{
+  "template": "address-*",
+  "index_patterns": ["address"],
+  "order": "1",
+  "settings": {
+    "refresh_interval": "5s"
+  },
+  "mappings": {
+    "properties": {
+      "doro_address": {
+        "type": "text",
+        "fields": {
+          "keyword": { "type": "keyword" }
+        }
+      },
+      "zibun_address": {
+        "type": "text",
+        "fields": {
+          "keyword": { "type": "keyword" }
+        }
+      },
+      "zip_code": {
+        "type": "keyword"
+      },
+      "build_name": {
+        "type": "keyword"
+      },
+      "manage_code": {
+        "type": "keyword"
+      },
+      "created_at": { "type": "date" },
+      "updated_at": { "type": "date" }
+    }
+  }
+}

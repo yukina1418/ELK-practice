@@ -1,0 +1,71 @@
+version: '3.7'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+     - ./src:/backend/src
+    ports:
+     - 3000:3000
+
+  database:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: 'root'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - 3308:3306
+    volumes:
+      - ./db/conf.d:/etc/mysql/conf.d
+      - ./db/initdb.d:/docker-entrypoint-initdb.d
+      - ./db/address_file/서울특별시.txt:/var/lib/seoul.txt
+      - ./db/address_file/세종특별자치시.txt:/var/lib/sejong.txt
+      - ./db/address_file/제주특별자치도.txt:/var/lib/jeju_do.txt
+      - ./db/address_file/경기도.txt:/var/lib/gyeonggi_do.txt
+      - ./db/address_file/강원도.txt:/var/lib/gangwon-do.txt
+      - ./db/address_file/경상남도.txt:/var/lib/gyeongsang_nam_do.txt
+      - ./db/address_file/경상북도.txt:/var/lib/gyeongsang_buk_do.txt
+      - ./db/address_file/충청남도.txt:/var/lib/chungcheong_nam_do.txt
+      - ./db/address_file/충청북도.txt:/var/lib/chungcheong_buk_do.txt
+      - ./db/address_file/전라남도.txt:/var/lib/jeolla_nam_do.txt
+      - ./db/address_file/전라북도.txt:/var/lib/jeolla_buk_do.txt
+      - ./db/address_file/광주광역시.txt:/var/lib/gwangju.txt
+      - ./db/address_file/대구광역시.txt:/var/lib/daegu.txt
+      - ./db/address_file/대전광역시.txt:/var/lib/daejeon.txt
+      - ./db/address_file/부산광역시.txt:/var/lib/busan.txt
+      - ./db/address_file/울산광역시.txt:/var/lib/ulsan.txt
+      - ./db/address_file/인천광역시.txt:/var/lib/incheon.txt
+      - ./db/address_file/20221006_변경분.txt:/var/lib/update.txt
+
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    depends_on:
+      - database
+    environment:
+      discovery.type: single-node
+    ports:
+      - 9200:9200
+    volumes:
+      - ./elasticsearch/config/jvm.options:/usr/share/elasticsearch/config/jvm.options
+
+  logstash:
+    image: logstash:7.17.0
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./logstash/mysql-connector-java-8.0.28.jar:/usr/share/logstash/mysql-connector-java-8.0.28.jar
+      # - ./logstash/pipeline/main.conf:/usr/share/logstash/pipeline/main.conf
+      # - ./logstash/pipeline/update.conf:/usr/share/logstash/pipeline/update.conf
+      - ./logstash/config/jvm.options:/usr/share/logstash/config/jvm.options
+      - ./logstash/templates/address_template.json:/usr/share/logstash/templates/address_template.json
+
+  kibana:
+    image: kibana:7.17.0
+    environment:
+      ELASTICSEARCH_UTL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - 5601:5601
+    

@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:root@database:3306/address"
+}
+
+model Main_address {
+  ZIP_NO             String?  @db.VarChar(5)
+  SIDO               String?  @db.VarChar(20)
+  SIDO_ENG           String?  @db.VarChar(40)
+  SIGUNGU            String?  @db.VarChar(20)
+  SIGUNGU_ENG        String?  @db.VarChar(40)
+  EUPMYUN            String?  @db.VarChar(20)
+  EUPMYUN_ENG        String?  @db.VarChar(40)
+  DORO_CD            String?  @db.VarChar(12)
+  DORO               String?  @db.VarChar(80)
+  DORO_ENG           String?  @db.VarChar(80)
+  UNDERGROUND_YN     String?  @db.Char(1)
+  BUILD_NO1          Decimal? @db.Decimal(5, 0)
+  BUILD_NO2          Decimal? @db.Decimal(5, 0)
+  BUILD_NO_MANAGE_NO String?  @db.VarChar(25)
+  DARYANG_NM         String?  @db.VarChar(40)
+  BUILD_NM           String?  @db.VarChar(200)
+  DONG_CD            String?  @db.VarChar(10)
+  DONG_NM            String?  @db.VarChar(20)
+  RI                 String?  @db.VarChar(20)
+  H_DONG_NM          String?  @db.VarChar(40)
+  SAN_YN             String?  @db.VarChar(1)
+  ZIBUN1             Decimal? @db.Decimal(4, 0)
+  EUPMYUN_DONG_SN    String?  @db.VarChar(2)
+  ZIBUN2             Decimal? @db.Decimal(4, 0)
+  ZIP_NO_OLD         String?  @db.VarChar(4)
+  ZIP_SN             String?  @db.VarChar(2)
+  CREATED_AT         DateTime @default(now()) @db.Timestamp(0)
+  UPDATED_AT         DateTime @default(now()) @db.Timestamp(0)
+  id                 Int      @id @default(autoincrement()) @db.UnsignedInt
+}
+
+model Update_address {
+  ZIP_NO                 String?  @db.VarChar(5)
+  SIDO                   String?  @db.VarChar(20)
+  SIGUNGU                String?  @db.VarChar(20)
+  EUPMYUN                String?  @db.VarChar(20)
+  DORO_CD                String?  @db.VarChar(12)
+  DORO                   String?  @db.VarChar(80)
+  UNDERGROUND_YN         String?  @db.Char(1)
+  BUILD_NO1              Decimal? @db.Decimal(5, 0)
+  BUILD_NO2              Decimal? @db.Decimal(5, 0)
+  BUILD_NO_MANAGE_NO     String?  @db.VarChar(25)
+  DARYANG_NM             String?  @db.VarChar(40)
+  BUILD_NM               String?  @db.VarChar(200)
+  DONG_CD                String?  @db.VarChar(10)
+  DONG_NM                String?  @db.VarChar(20)
+  RI                     String?  @db.VarChar(20)
+  H_DONG_NM              String?  @db.VarChar(40)
+  SAN_YN                 String?  @db.VarChar(1)
+  ZIBUN1                 Decimal? @db.Decimal(4, 0)
+  ZIBUN2                 Decimal? @db.Decimal(4, 0)
+  MOVE_CD                String?  @db.VarChar(2)
+  BEFORE_EUPMYUN_DONG_SN String?  @db.VarChar(2)
+  AFTER_EUPMYUN_DONG_SN  String?  @db.VarChar(2)
+  UPDATE_DATE            String?  @db.VarChar(14)
+  ZIP_NO_OLD             String?  @db.VarChar(4)
+  ZIP_SN                 String?  @db.VarChar(2)
+  CREATED_AT             DateTime @default(now()) @db.Timestamp(0)
+  UPDATED_AT             DateTime @default(now()) @db.Timestamp(0)
+  id                     Int      @id @default(autoincrement()) @db.UnsignedInt
+}
