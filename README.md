@@ -1,73 +1,180 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+>NestJS에서 ELK STACK을 사용하여 나만의 주소 검색 엔진을 간단하게 만들어봤습니다.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+두달차 개발자가 4일만에 작업한 것이라 완성도가 떨어지는 점 유의해주세요!
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+### 목차
 
-## Description
+1. [데이터베이스에 넣을 파일 다운로드](#데이터베이스에-넣을-파일-다운로드)
+2. [도커를 실행시켜서 주소 정보를 데이터베이스에 넣기](#도커를-실행시켜서-주소-정보를-데이터베이스에-넣기)
+3. [데이터베이스를 로그스태시로 전처리를 하여 엘라스틱서치에 주소 정보를 집어넣기](#데이터베이스를-로그스태시로-전처리를-하여-엘라스틱서치에-주소-정보를-집어넣기)
+4. [한달 주기로 올라오는 정보를 기준으로 엘라스틱서치 도큐먼트 업데이트하기](#한달-주기로-올라오는-정보를-기준으로-엘라스틱서치-도큐먼트-업데이트하기)
+5. [키바나에서 데이터가 잘 들어갔는지 확인하기](#키바나에서-데이터가-잘-들어갔는지-확인하기)
+6. [서버에 연결해서 엘라스틱서치에서 데이터 호출해보기](#서버에-연결해서-엘라스틱서치에서-데이터-호출해보기)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 데이터베이스에 넣을 파일 다운로드
 
-## Installation
+먼저 아래의 압축파일을 다운받아주세요.
 
-```bash
-$ npm install
+https://drive.google.com/file/d/1WRI7i_X-i0PxZOnrKhGp1aJ4XQXF8VCw/view?usp=sharing
+
+해당 파일은 우체국에서 제공하는 DB 정보를 UTF-8로 인코딩한 파일들입니다.
+
+신뢰할 수 없다고 생각하신다면 하단의 우체국에서 직접 다운로드를 받으신 후 UTF-8로 인코딩을 진행해주세요.
+
+다운로드를 받으셔야하는 정보는 두가지입니다.
+
+1. 지역별 주소 DB
+2. 우편번호 변경분 DB
+
+우체국 => https://www.epost.go.kr/search/zipcode/areacdAddressDown.jsp
+
+>해당 압축파일을 해당 위치에 넣어주세요.
+
+**db/address_file/**
+
+![image](https://user-images.githubusercontent.com/82861572/197435274-3c24332a-0d37-48ca-b1d7-73979dae2464.png)
+
+위와 같은 구조가 되면 이제 테스트를 할 준비가 완료됐습니다.
+
+## 도커를 실행시켜서 주소 정보를 데이터베이스에 넣기
+
+>처음에는 데이터베이스만 실행시켜서 값을 넣어줘야합니다.
+
+데이터베이스를 제외한 모든 설정값은 주석처리를 하고 실행시켜주세요. (이렇게 주석처리 안하고 따로따로 키는 방법..아시는..분?)
+
+![image](https://user-images.githubusercontent.com/82861572/197447394-b47bbf44-9a1b-4a6a-9556-09cd17c3b14c.png)
+
+1. docker-compose build
+2. docker-compose up
+
+>어, 에러가 뜨면서 도커가 꺼지는데요?
+
+![image](https://user-images.githubusercontent.com/82861572/197447777-7c842abb-5324-45f1-b8b2-a08f5f03c81e.png)
+
+**정상입니다...**
+
+File Load를 하기 위해서 local_infile 옵션을 true로 바꿔주는 작업이 필요한데, **해당 설정값이 적용이 한번에 되지 않는 이슈가 있습니다.**
+
+**다시 한번 도커를 다시 올려주시면 해결됩니다.**
+
+## 데이터베이스를 로그스태시로 전처리를 하여 엘라스틱서치에 주소 정보를 집어넣기
+
+![image](https://user-images.githubusercontent.com/82861572/197448569-7cc5b23d-8fc0-456a-8324-cbfeeedf079c.png)
+
+
+위의 사진처럼 로그스태시 볼륨의 3번째 줄, 업데이트 conf를 주석처리해주세요.
+
+그 후 동일하게 도커를 실행시켜주시면 됩니다.
+
+1. docker-compose build
+2. docker-compose up
+
+>해당 작업은 컴퓨터의 많은 리소스를 할당하여 작업이 진행되는 점을 유의해주세요.
+
+또한 주소 정보가 매우 많은 관계로 긴 시간이 소요됩니다.
+
+Intel Mac Pro 기준으로 모든 데이터가 입력되는데 대략 1시간 30분가량 걸립니다. (도큐먼트가 대략 630만개정도 들어갑니다.)
+
+## 한달 주기로 올라오는 정보를 기준으로 엘라스틱서치 도큐먼트 업데이트하기
+
+![image](https://user-images.githubusercontent.com/82861572/197448943-f7dad658-adc3-4b17-8199-4f82f675e229.png)
+
+
+우체국에서 제공하는 정보는 한달 주기로 데이터가 업데이트됩니다.
+
+PK는 건물 관리 번호라는 것을 기준으로 잡혀있는데, 로그스태시를 통하여 값을 넣을 때 건물 관리 번호를 기준으로 넣게 작업을 해놨습니다.
+
+>그래서 같은 건물 관리 번호가 나올 경우 해당 도큐먼트를 삭제하고, 새로 인서트를 해줍니다.
+
+**이러한 이유때문에 두개의 conf 파일을 동시에 올리실 경우 문제가 발생할 수 있습니다.**
+
+## 키바나에서 데이터가 잘 들어갔는지 확인하기
+
+![image](https://user-images.githubusercontent.com/82861572/197448774-26152de5-6709-4eb3-a875-af14a593a2c2.png)
+
+데이터는 한번만 들어가고, 한달 단위로 업데이트가 이뤄질 예정이기에 불필요한 로그스태시는 켜놓지 않아도 됩니다.
+
+**위의 사진처럼 로그스태시를 주석처리하시고, 키바나는 주석을 풀어서 도커를 실행해주세요.**
+
+>키바나의 로컬 접속은 localhost:5601입니다.
+
+<img width="315" alt="image" src="https://user-images.githubusercontent.com/82861572/197449520-38104c7a-77f0-4b20-8d59-ea0d8253e151.png">
+
+사진처럼 정상적으로 접속을 하셨다면 위의 사진처럼 햄버거를 누르신 후 **Discover**를 클릭해주세요.
+
+만약 템플릿을 정의하라고 나온다면 address를 치신 후 아래 리스트에 필드 정의 X를 누르신 다음 생성버튼을 누르시면 됩니다.
+
+**그 후 다시 Discover를 누르셨을 때 아래 화면처럼 나오면 성공입니다!**
+
+![image](https://user-images.githubusercontent.com/82861572/197449768-87e57c7b-90c7-4ab1-b6a9-db64c5d8de7d.png)
+
+## 서버에 연결해서 엘라스틱서치에서 데이터 호출해보기
+
+![image](https://user-images.githubusercontent.com/82861572/197449853-c861622a-72aa-48bb-8d0e-d9128f9de6ec.png)
+
+도커파일 최상단에 있던 서버를 주석을 풀어주시고 도커를 다시 실행해주세요.
+
+그 후 **localhost:3000/graphql**로 접속하시면 아래의 화면처럼 보이실겁니다.
+
+<img width="1779" alt="image" src="https://user-images.githubusercontent.com/82861572/197450051-8758d153-25fe-438e-aaff-1cf8f29d0132.png">
+
+API를 많이 만들어놓질 않아서 사용할 수 있는 것은 많이 없습니다(...)
+
+모양은 아래 예시처럼 적혀있는 것을 보고 사용하실 수 있고, **리턴값 같은 경우는 원하는 것만 체크를 해서 가져오실 수 있습니다.**
+
+오른쪽 사이드에 있는 DOCS를 누르실 경우 어떤 API가 존재하는지, API의 이름과 입력값 반환값 그리고 타입에 대한 정의가 되어있습니다.
+
+<img width="743" alt="image" src="https://user-images.githubusercontent.com/82861572/197451220-8aa239be-d915-4401-abfd-2c059076ec43.png">
+
+
+
+
+
+>우편번호를 기준으로 데이터베이스에서 정보를 가져오기
+(속도가 매-우 느립니다.)
+
+```
+query{
+  fetchByZipCode(zipCode:"10000"){
+    DORO
+    }
+}
 ```
 
-## Running the app
+>우편번호를 기준으로 엘라스틱서치에서 정보를 가져오기
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+query{
+searchByZipCode(zipCode:"10000"){
+  zip_code
+  doro_address
+  }
+}
 ```
 
-## Test
+>주소를 기준으로 엘라스틱서치에서 유사도가 제일 높은 주소 정보 1개 가져오기
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+query{
+searchOneByAddress(address:"서울 서초구 서운로 135"){
+  zip_code
+  doro_address
+  }
+}
 ```
 
-## Support
+>주소를 기준으로 관련성이 있는 모든 주소정보 가져오기 (최대1만개)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```
+query{
+searchListByAddress(address:"서울 서초구 서운로 135"){
+  zip_code
+  doro_address
+  }
+}
+```
 
-## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+<hr>
 
-## License
-
-Nest is [MIT licensed](LICENSE).
+재미삼아서 만들어봤는데, 실제로 쓸 수 있을지는 모르겠습니다...
