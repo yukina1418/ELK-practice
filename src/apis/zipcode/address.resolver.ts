@@ -26,9 +26,4 @@ export class AddressResolver {
   searchOneByAddress(@Args({ name: 'address', type: () => String }) address: string): Promise<Source[]> {
     return this.addressService.searchByAddress(address);
   }
-
-  @Query(() => String)
-  searchCheckByAddress(@Args({ name: 'data', type: () => [[String]] }) data: string[][]) {
-    this.addressService.searchCheckByAddress(data);
-  }
 }
