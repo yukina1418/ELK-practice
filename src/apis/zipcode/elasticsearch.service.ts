@@ -1,29 +1,34 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { PrismaService } from '../prisma/prisma.service';
 import { Source } from './address.dto';
-import { Address } from './address.entity';
 
 @Injectable()
-export class AddressService {
-  constructor(
-    @Inject(PrismaService)
-    private readonly prisma: PrismaService,
-    private readonly elasticsearchService: ElasticsearchService
-  ) {}
+export class ElasticService {
+  constructor(private readonly elasticsearchService: ElasticsearchService) {}
 
-  /**
-   * findMany를 사용하여 다량의 주소 정보를 가져온다.
-   *
-   * @param zipCode 정보를 찾을 우편번호 5자리
-   * @returns 해당하는 Address []
-   */
-  public async findByZipCode(zipCode: string): Promise<Address[]> {
-    const address = await this.prisma.main_address.findMany({
-      where: { ZIP_NO: zipCode },
+  public async searchNgamByAddress(address: string): Promise<Source[]> {
+    const document = await this.elasticsearchService.search({
+      index: 'check',
+      size: 5,
+      query: {
+        multi_match: {
+          query: address,
+          type: 'cross_fields',
+          operator: 'OR',
+          fields: ['low_zibun_address', 'low_doro_address', 'build_name'],
+        },
+      },
     });
 
-    return address;
+    console.dir(document, { depth: null });
+
+    const result = document.hits.hits.map((val) => {
+      if (this.isSource(val._source)) {
+        return val._source;
+      }
+    });
+
+    return result;
   }
 
   /**
@@ -91,11 +96,15 @@ export class AddressService {
 
     const address = this.updateAddress(array_address);
 
+    const regexAddress = this.regex(address);
+
     const isZibun = array_address.some((val) => {
-      return val[val.length - 1] !== '동' || '리';
+      return val[val.length - 1] === '동' || '리';
     });
 
     let boosting = '';
+
+    console.log(isZibun);
 
     if (isZibun) {
       boosting = 'doro_address';
@@ -105,13 +114,13 @@ export class AddressService {
 
     const document = await this.elasticsearchService.search({
       index: 'address',
-      size: 1,
+      size: 10,
       query: {
         multi_match: {
           query: address,
           type: 'cross_fields',
           operator: 'OR',
-          fields: [boosting],
+          fields: ['zibun_address'],
         },
       },
     });
@@ -164,13 +173,26 @@ export class AddressService {
    * @returns 분리된 결과값
    */
   private regex(address: string): string {
-    const reg = address.match(/(\d{1,5})-?(\d{1,4}$)?/);
+    const reg = new RegExp(/(^0-9*?가-힣|\s){1,}[0-9$-?0-9$?]{1,10}[^\(]/);
 
-    const realAddress = address.split(reg[0]) + reg[0];
+    const address4 = address.match(reg);
 
-    return realAddress;
+    let address1 = address.split(reg)[0];
+    let address2 = '';
+    const address3 = address.split(reg)[1];
+
+    console.log();
+    if (address4[0] === '동' || '리' || '로' || '길') {
+      address1 += address4[0][0];
+      address2 = address4[0].slice(1);
+    }
+
+    console.log(address1);
+    console.log(address2);
+    console.log(address3);
+    return address2;
   }
-
+  //  [동|리|로|길|\s]{1}[$0-9$-?$0-9$][^가-힣]{1,10}
   /**
    * unknown타입의 엘라스틱서치 도큐먼트에 타입을 지정한다.
    *

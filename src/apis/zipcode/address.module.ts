@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddressResolver } from './address.resolver';
-import { AddressService } from './address.service';
+import { ElasticService } from './elasticsearch.service';
+import { PrismaQueryService } from './prisma.service';
+import { TypeORMQueryService } from './typeorm.service';
 
 @Module({
   imports: [
@@ -10,6 +12,6 @@ import { AddressService } from './address.service';
       node: `http://elasticsearch:9200`,
     }),
   ],
-  providers: [AddressService, AddressResolver, PrismaService],
+  providers: [AddressResolver, PrismaService, TypeORMQueryService, PrismaQueryService, ElasticService],
 })
 export class AddressModule {}
