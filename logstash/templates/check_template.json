@@ -1,0 +1,64 @@
+{
+  "template": "check-*",
+  "index_patterns": ["check"],
+  "order": "1",
+  "settings": {
+    "refresh_interval": "5s",
+    "analysis": {
+      "analyzer": {
+        "custom_analyzer": {
+          "tokenizer": "custom_gram"
+        }
+      },
+      "tokenizer": {
+        "custom_gram": {
+          "type": "nGram",
+          "min_gram": "1",
+          "max_gram": "10"
+        }
+      }
+    },
+    "max_ngram_diff": "20"
+  },
+  "mappings": {
+    "properties": {
+      "low_doro_address": {
+        "type": "text",
+        "analyzer": "custom_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword" }
+        }
+      },
+      "low_zibun_address": {
+        "type": "text",
+        "analyzer": "custom_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword" }
+        }
+      },
+      "doro_address": {
+        "type": "text",
+        "fields": {
+          "keyword": { "type": "keyword" }
+        }
+      },
+      "zibun_address": {
+        "type": "text",
+        "fields": {
+          "keyword": { "type": "keyword" }
+        }
+      },
+      "zip_code": {
+        "type": "keyword"
+      },
+      "build_name": {
+        "type": "keyword"
+      },
+      "manage_code": {
+        "type": "keyword"
+      },
+      "created_at": { "type": "date" },
+      "updated_at": { "type": "date" }
+    }
+  }
+}
